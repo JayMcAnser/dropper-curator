@@ -1,6 +1,6 @@
 <template>
   <div>
-    <h1>This is the DROPPER - Curator</h1>
+    <h1>This is the DROPPER - Curator version: {{$globals.version}}</h1>
     <p>Dropper curator is best viewed on a phone. To show we will open a new window in the size of standard phone. Press the link below</p>
     <a @click="openPhone()">Open in new Phone window</a>
   </div>

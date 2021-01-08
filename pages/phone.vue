@@ -1,12 +1,13 @@
 <template>
   <div>
-    <h1>This is the phone window</h1>
+    <ExhibitionView> </ExhibitionView>
   </div>
 </template>
 
 <script>
 export default {
-name: "phone"
+  name: "phone",
+  layout: 'phone'
 }
 </script>
 
