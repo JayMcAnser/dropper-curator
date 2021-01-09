@@ -5,7 +5,7 @@
         <h2>Virtual phone layouts</h2>
         <ul>
           <li v-for="(phone, index) in phones" :key="phone.type" :class="activeStyleIndex === index ? 'active' :''">
-            <a @click="activeStyleIndex=index">{{ phone.type }}</a>
+            <a @click="activeStyleIndex=index">{{ phone.type }} ({{ phone.width }} x {{ phone.height}})</a>
           </li>
         </ul>
         <h2>On a phone</h2>
@@ -13,8 +13,8 @@
           <li><a href="/phone">Remove border</a></li>
         </ul>
       </div>
-      <div class="smartphone" :style="style">
-        <div class="content" :style="style">
+      <div class="smartphone">
+        <div class="content" :style="canvas">
           <iframe src="/phone" style="width:100%;border:none;height:100%" />
         </div>
       </div>
@@ -25,6 +25,7 @@
 <script>
 export default {
   name: "webphone",
+  layout: 'blank',
   data: function() {
     return {
       activeStyleIndex: 0,
@@ -43,7 +44,7 @@ export default {
     currentStyle() {
       return this.phones[this.activeStyleIndex].css
     },
-    style() {
+    canvas() {
       return { width: this.phones[this.activeStyleIndex].width, height: this.phones[this.activeStyleIndex].height};
     }
   }
