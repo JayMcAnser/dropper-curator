@@ -17,6 +17,7 @@ name: "phone"
 </script>
 
 <style scoped>
+
   .no-padding {
     padding: 0;
   }

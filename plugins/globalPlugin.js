@@ -3,5 +3,5 @@
  */
 
 export default ({ app }, inject) => {
-  inject('globals', { version: '0.0.3'})
+  inject('globals', { version: '0.0.4'})
 }
