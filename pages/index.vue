@@ -1,29 +1,104 @@
 <template>
-  <div>
-    <h1>This is the DROPPER - Curator version: {{$globals.version}}</h1>
-    <p>Dropper curator is best viewed on a phone. To show we will open a new window in the size of standard phone. Press the link below</p>
-    <a @click="openPhone()">Open in new Phone window</a>
-    <p>But you can look at also in the <a href="/phone">current size</a></p>
+  <div class="ma-4">
+    <div class="d-flex flex-row mb-2">
+      <div>
+        <h2>Virtual phone layouts</h2>
+        <ul>
+          <li v-for="(phone, index) in phones" :key="phone.type" :class="activeStyleIndex === index ? 'active' :''">
+            <a @click="activeStyleIndex=index">{{ phone.type }} ({{ phone.width }} x {{ phone.height}})</a>
+          </li>
+        </ul>
+        <h2>On a phone</h2>
+        <ul>
+          <li><a href="/phone">Remove border</a></li>
+        </ul>
+      </div>
+      <div class="smartphone">
+        <div class="content" :style="canvas">
+          <iframe src="/phone" style="width:100%;border:none;height:100%" />
+        </div>
+      </div>
+    </div>
   </div>
 </template>
 
 <script>
 export default {
-  name: "index",
+  name: "webphone",
+  layout: 'blank',
   data: function() {
     return {
-      phoneWidth: 600,
-      phoneHeight: 960
+      activeStyleIndex: 0,
+      phones: [
+        {type: 'IPhone XS', width: '414px', height: '896px'},
+        {type: 'IPhone 8 Plus', width: '414x', height: '736px'},
+        {type: 'IPhone 7', width: '375x', height: '667px'},
+        {type: 'One Plus', width: '480px', height: '853px'},
+        {type: 'Samsung Galaxy s9', width: '412px', height: '869px' },
+        {type: 'Samsung Galaxy s7', width: '360px', height: '640px' },
+        {type: 'Samsung Note 10', width: '360px', height: '740px' },
+        {type: 'Huawei P20', width: '360px', height: '748px' },
+        {type: 'Xiaomi Redme 5', width: '393px', height: '786px' },
+      ]
     }
   },
-  methods:{
-    openPhone: function () {
-      window.open("/phone", "_blank", `toolbar=0,location=0,menubar=0,width=${this.phoneWidth},height=${this.phoneHeight}`);
+  computed:{
+    currentStyle() {
+      return this.phones[this.activeStyleIndex].css
+    },
+    canvas() {
+      return { width: this.phones[this.activeStyleIndex].width, height: this.phones[this.activeStyleIndex].height};
     }
   }
+
 }
 </script>
 
 <style scoped>
+/* The device with borders */
+.smartphone {
+  position: relative;
+  margin: auto;
+  border: 16px black solid;
+  border-top-width: 60px;
+  border-bottom-width: 60px;
+  border-radius: 36px;
+}
+.active {
+  font-weight: bold;
+}
+/* The horizontal line on the top of the device */
+.smartphone:before {
+  content: '';
+  display: block;
+  width: 60px;
+  height: 5px;
+  position: absolute;
+  top: -30px;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  background: #333;
+  border-radius: 10px;
+}
 
+/* The circle on the bottom of the device */
+.smartphone:after {
+  content: '';
+  display: block;
+  width: 35px;
+  height: 35px;
+  position: absolute;
+  left: 50%;
+  bottom: -65px;
+  transform: translate(-50%, -50%);
+  background: #333;
+  border-radius: 50%;
+}
+
+
+/* The screen (or content) of the device */
+.smartphone .content {
+  height: 640px;
+  background: white;
+}
 </style>

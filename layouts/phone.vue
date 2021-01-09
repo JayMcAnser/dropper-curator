@@ -1,6 +1,11 @@
 <template>
   <v-app>
-    <SparkLine></SparkLine>
+    <SparkLine
+        :active-column="activeColIndex"
+        :columns="columns"
+    >
+
+    </SparkLine>
     <v-main>
       <v-container class="no-padding">
         <nuxt />
@@ -12,7 +17,31 @@
 
 <script>
 export default {
-name: "phone"
+  name: "phone",
+  data: function() {
+    return {
+      activeColIndex: 2
+    }
+  },
+  computed: {
+    columns() {
+      return [
+        {value: 10},
+        {value: 30},
+        {value: 20},
+        {value: 10},
+        {value: 30},
+        {value: 20},
+        {value: 10},
+        {value: 30},
+        {value: 20},
+        {value: 10},
+        {value: 30},
+        {value: 20},
+
+      ]
+    }
+  }
 }
 </script>
 

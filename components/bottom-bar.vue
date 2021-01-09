@@ -3,6 +3,10 @@
       color="primary"
       app
   >
+    <div class="text-caption" >
+      {{$globals.version}}
+    </div>
+
     <v-btn>
       <img src="~/assets/temp/exhibition.png" />
     </v-btn>
@@ -14,7 +18,7 @@
     <v-btn>
       <img src="~/assets/temp/backside.png" />
     </v-btn>
-    <div id="version" >{{$globals.version}}</div>
+
   </v-bottom-navigation>
 </template>
 
@@ -25,7 +29,5 @@ export default {
 </script>
 
 <style scoped>
-  #version {
-    float: right;
-  }
+
 </style>

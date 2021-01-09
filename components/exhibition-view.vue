@@ -13,7 +13,6 @@ export default {
 <style scoped>
   #id-image {
     object-fit: cover;
-    width: 600px;
-    height: 900px;
+    width: 100%;
   }
 </style>

@@ -3,7 +3,9 @@
   "version": "0.0.2",
   "private": true,
   "scripts": {
-    "dev": "nuxt",
+    "clear": "killall node",
+    "devold": "nuxt",
+    "dev": "nodemon --inspect node_modules/.bin/nuxt",
     "build": "nuxt build",
     "start": "nuxt start",
     "generate": "nuxt generate",
