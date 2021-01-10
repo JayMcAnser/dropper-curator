@@ -3,15 +3,18 @@
       fixed
       app
   >
+    <!--  v-on:mousemove="trackMouse" -->
     <div id="spark-container"
          ref="spark"
          @click="sparkClick"
-         v-on:mousemove="trackMouse"
-         v-touch:moving="track"
+
+
          v-touch:swipe.left="swipeLeft"
          v-touch:swipe.right="swipeRight"
     >
-        <svg id="spark" ref="spark" width="100%" height="100%">
+        <svg id="spark" ref="spark" width="100%" height="100%"
+             v-touch:moving="track"
+        >
           <line v-for="spark in sparks" :key="spark.index"
                :x1="spark.x" :y1="sparkTop" :x2="spark.x" :y2="spark.y + sparkTop" style="stroke:rgb(0,0,0);stroke-width:3" />
           <polygon :points="sparkMark" style="fill:rgb(74,118,210);stroke:rgb(74,118,210);stroke-width:1" />
@@ -107,35 +110,40 @@ export default {
       }
     },
     track(event) {
-      if (this.mouseStartPos === false) {
-        this.mouseStartPos = event.clientX;
-      } else {
-        let dif = this.mouseStartPos - event.clientX;
-        let margin = this.sparkStep / 2;
-        if (Math.abs(dif) > margin) { // we have to move
-          let change = Math.ceil(dif / margin);
-          this.activeColIndex += change;
-          this.mapSparks()
-          this.mouseStartPos = event.clientX;
-        }
-      }
+      console.log('track')
+      this.buttonState = `x: ${event.clientX}`
+      this.trackMouse(event)
     },
 
     // track mouse movement if pressed
     trackMouse(event) {
+      console.log('mouse')
       if (event.buttons === 1) {
-        this.track(event)
+        if (this.mouseStartPos === false) {
+          this.mouseStartPos = event.clientX;
+        } else {
+          let dif = this.mouseStartPos - event.clientX;
+          let margin = this.sparkStep / 2;
+          if (Math.abs(dif) > margin) { // we have to move
+            let change = Math.ceil(dif / margin);
+            this.activeColIndex += change;
+            this.mapSparks()
+            this.mouseStartPos = event.clientX;
+          }
+        }
       } else if (this.mouseStartPos) {
         this.mouseStartPos = false
       }
     },
     swipeLeft(e) {
-      this.activeColIndex -= (this.sparkCount / 2) -2;
-      this.mapSparks()
+      // this.buttonState = 'left'
+      // this.activeColIndex -= (this.sparkCount / 2) -2;
+      // this.mapSparks()
     },
     swipeRight(e) {
-      this.activeColIndex += (this.sparkCount / 2) -2;
-      this.mapSparks()
+      // this.buttonState = 'right'
+      // this.activeColIndex += (this.sparkCount / 2) -2;
+      // this.mapSparks()
     }
 
   },
