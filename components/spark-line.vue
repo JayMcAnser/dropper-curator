@@ -57,6 +57,7 @@ export default {
         let e = {
           index: index,
           x: (index * this.sparkStep) + (this.sparkWidth / 2),
+          y: 0
       //    y: 25
         }
         this.sparks.push(e)
@@ -73,7 +74,7 @@ export default {
         let maxVal = 0;
         this.columns.forEach(x => {if (x.value > maxVal) {maxVal = x.value}});
         // the this.index should be in the center
-        let columnIndex = this.activeColIndex - Math.ceil(this.sparkCount / 2);
+        let columnIndex = this.activeColIndex - Math.floor(this.sparkCount / 2);
         for (let index = 0; index < this.sparks.length; index++) {
           if (columnIndex >= 0 && columnIndex < this.columns.length) { // there is data for this column
             this.sparks[index].y = Math.floor(this.sparkTop * (this.columns[columnIndex].value / maxVal) * .95)
@@ -86,11 +87,12 @@ export default {
 
     // user clicked on the spark line
     sparkClick(event) {
+      let margin = this.sparkStep / 2;
       for (let index = 0; index < this.sparkCount; index++) {
-        if (event.clientX < this.sparks[index].x) {
+        if (event.clientX > this.sparks[index].x - margin && event.clientX < this.sparks[index].x + margin) {
           // found it
-          this.activeColIndex = index;
-          console.log('FOUND:', this.activeColIndex)
+          this.activeColIndex = this.activeColIndex - ( Math.ceil(this.sparkCount / 2) - index); // - Math.floor(this.sparkCount / 2) ;
+          console.log('FOUND:', this.activeColIndex, 'index:', index , 'mouse x pos', event.clientX, 'spark',this.sparks[index].x, 'margin', margin )
           this.mapSparks()
           break;
         }

@@ -26,19 +26,28 @@ export default {
   computed: {
     columns() {
       return [
-        {value: 10},
-        {value: 30},
-        {value: 20},
-        {value: 10},
-        {value: 30},
-        {value: 20},
-        {value: 10},
-        {value: 30},
-        {value: 20},
-        {value: 10},
-        {value: 30},
-        {value: 20},
-
+        {value: 10}, // 0
+        {value: 30},// 1
+        {value: 20},// 2
+        {value: 10},// 3
+        {value: 30},// 4
+        {value: 20},// 5
+        {value: 10},// 6
+        {value: 30},// 7
+        {value: 20},// 8
+        {value: 10},// 9
+        {value: 30},// 10
+        {value: 10}, // 0
+        {value: 30},// 1
+        {value: 20},// 2
+        {value: 10},// 3
+        {value: 30},// 4
+        {value: 20},// 5
+        {value: 10},// 6
+        {value: 30},// 7
+        {value: 20},// 8
+        {value: 10},// 9
+        {value: 30},// 10
       ]
     }
   }
