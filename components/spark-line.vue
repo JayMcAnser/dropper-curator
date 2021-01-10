@@ -7,7 +7,9 @@
          ref="spark"
          @click="sparkClick"
          v-on:mousemove="trackMouse"
-         v-on:touchmove="track"
+         v-touch:moving="track"
+         v-touch:swipe.left="swipeLeft"
+         v-touch:swipe.right="swipeRight"
     >
         <svg id="spark" ref="spark" width="100%" height="100%">
           <line v-for="spark in sparks" :key="spark.index"
@@ -126,7 +128,16 @@ export default {
       } else if (this.mouseStartPos) {
         this.mouseStartPos = false
       }
+    },
+    swipeLeft(e) {
+      this.activeColIndex -= (this.sparkCount / 2) -2;
+      this.mapSparks()
+    },
+    swipeRight(e) {
+      this.activeColIndex += (this.sparkCount / 2) -2;
+      this.mapSparks()
     }
+
   },
   mounted: function() {
     console.log('render');
