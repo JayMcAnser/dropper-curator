@@ -6,6 +6,7 @@
     <div id="spark-container"
          ref="spark"
          @click="sparkClick"
+         v-on:mousemove="trackMouse"
     >
         <svg id="spark" ref="spark" width="100%" height="100%">
           <line v-for="spark in sparks" :key="spark.index"
@@ -36,7 +37,8 @@ export default {
       currentHeight: 0,
       sparkStep: 0,
       sparkMark: '',
-      activeColIndex: 0
+      activeColIndex: 0,
+      mouseStartPos: false, // position where the mouse move did start or false if no drag is active
     }
   },
   methods: {
@@ -58,7 +60,6 @@ export default {
           index: index,
           x: (index * this.sparkStep) + (this.sparkWidth / 2),
           y: 0
-      //    y: 25
         }
         this.sparks.push(e)
       }
@@ -82,22 +83,44 @@ export default {
           columnIndex++
         }
       }
-      console.log('sparks:', this.sparks)
+     // console.log('sparks:', this.sparks)
     },
 
     // user clicked on the spark line
     sparkClick(event) {
-      let margin = this.sparkStep / 2;
-      for (let index = 0; index < this.sparkCount; index++) {
-        if (event.clientX > this.sparks[index].x - margin && event.clientX < this.sparks[index].x + margin) {
-          // found it
-          this.activeColIndex = this.activeColIndex - ( Math.ceil(this.sparkCount / 2) - index); // - Math.floor(this.sparkCount / 2) ;
-          console.log('FOUND:', this.activeColIndex, 'index:', index , 'mouse x pos', event.clientX, 'spark',this.sparks[index].x, 'margin', margin )
-          this.mapSparks()
-          break;
+      if (!this.mouseStartPos) {
+        let margin = this.sparkStep / 2;
+        for (let index = 0; index < this.sparkCount; index++) {
+          if (event.clientX > this.sparks[index].x - margin && event.clientX < this.sparks[index].x + margin) {
+            // found it
+            this.activeColIndex = this.activeColIndex - (Math.ceil(this.sparkCount / 2) - index); // - Math.floor(this.sparkCount / 2) ;
+            // console.log('FOUND:', this.activeColIndex, 'index:', index, 'mouse x pos', event.clientX, 'spark', this.sparks[index].x, 'margin', margin)
+            this.mapSparks()
+            break;
+          }
         }
+        // console.log('user clicked on ', event)
       }
-      console.log('user clicked on ',event)
+    },
+
+    // track mouse movement if pressed
+    trackMouse(event) {
+      if (event.buttons === 1) {
+        if (this.mouseStartPos === false) {
+          this.mouseStartPos = event.clientX;
+        } else {
+          let dif = this.mouseStartPos - event.clientX;
+          let margin = this.sparkStep / 2;
+          if (Math.abs(dif) > margin) { // we have to move
+            let change = Math.ceil(dif / margin);
+            this.activeColIndex += change;
+            this.mapSparks()
+            this.mouseStartPos = event.clientX;
+          }
+        }
+      } else if (this.mouseStartPos) {
+        this.mouseStartPos = false
+      }
     }
   },
   mounted: function() {
