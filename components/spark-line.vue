@@ -7,6 +7,7 @@
          ref="spark"
          @click="sparkClick"
          v-on:mousemove="trackMouse"
+         v-on:touchmove="track"
     >
         <svg id="spark" ref="spark" width="100%" height="100%">
           <line v-for="spark in sparks" :key="spark.index"
@@ -14,7 +15,7 @@
           <polygon :points="sparkMark" style="fill:rgb(74,118,210);stroke:rgb(74,118,210);stroke-width:1" />
         </svg>
       <!-- <line x1="3" y1="0" x2="3" y2="800" style="stroke:rgb(0,0,0);stroke-width:2" /> -->
-      <a @click="generateSparks()">generate</a>
+      <a @click="generateSparks()">generate {{ buttonState }}</a>
 
     </div>
   </v-app-bar>
@@ -39,6 +40,7 @@ export default {
       sparkMark: '',
       activeColIndex: 0,
       mouseStartPos: false, // position where the mouse move did start or false if no drag is active
+      buttonState: '',
     }
   },
   methods: {
@@ -102,22 +104,25 @@ export default {
         // console.log('user clicked on ', event)
       }
     },
+    track(event) {
+      if (this.mouseStartPos === false) {
+        this.mouseStartPos = event.clientX;
+      } else {
+        let dif = this.mouseStartPos - event.clientX;
+        let margin = this.sparkStep / 2;
+        if (Math.abs(dif) > margin) { // we have to move
+          let change = Math.ceil(dif / margin);
+          this.activeColIndex += change;
+          this.mapSparks()
+          this.mouseStartPos = event.clientX;
+        }
+      }
+    },
 
     // track mouse movement if pressed
     trackMouse(event) {
       if (event.buttons === 1) {
-        if (this.mouseStartPos === false) {
-          this.mouseStartPos = event.clientX;
-        } else {
-          let dif = this.mouseStartPos - event.clientX;
-          let margin = this.sparkStep / 2;
-          if (Math.abs(dif) > margin) { // we have to move
-            let change = Math.ceil(dif / margin);
-            this.activeColIndex += change;
-            this.mapSparks()
-            this.mouseStartPos = event.clientX;
-          }
-        }
+        this.track(event)
       } else if (this.mouseStartPos) {
         this.mouseStartPos = false
       }
