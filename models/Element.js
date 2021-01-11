@@ -15,6 +15,7 @@ export default class Element extends Model {
       type: this.string('text'),
       text: this.string(null).nullable(),
       imageUrl: this.string('').nullable(),
+      columnId: this.attr(null),
       //
       // columnId: this.belongsTo(Column, '')
     }

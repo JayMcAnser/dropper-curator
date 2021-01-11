@@ -1,12 +1,13 @@
 <template>
   <div>
     <img id="id-image" src="~/assets/temp/exhibition-view.png"/>
+
   </div>
 </template>
 
 <script>
 export default {
-  name: "exhibition-view"
+  name: "exhibition-view",
 }
 </script>
 

@@ -39,11 +39,13 @@ interface TouchEvent {
 }
 
  */
+import Column from "~/models/Column";
+
 export default {
   name: "SparkLine",
   props: {
-    columns: Array,
-    activeColumn: Number
+    columns1: Array,
+    activeColumn1: Number
   },
   data: function() {
     return {
@@ -55,10 +57,27 @@ export default {
       currentHeight: 0,
       sparkStep: 0,
       sparkMark: '',
-      activeColIndex: 0,
+     // activeColIndex: 0,
       mouseStartPos: false, // position where the mouse move did start or false if no drag is active
       buttonState: '',
     }
+  },
+  computed: {
+    columns() {
+      console.log('get columns')
+      return Column.query()
+          .with('elements')
+          .get();
+    },
+    activeColIndex: {
+      get: function() {
+        return this.$store.state.board.activeColumnIndex
+      },
+      set: function(index) {
+        console.log('set active', index)
+        this.$store.commit('board/activeIndex', index)
+      }
+    },
   },
   methods: {
     refresh() {
@@ -84,6 +103,12 @@ export default {
       }
     },
 
+    elementCount(column) {
+      if (column.elements) {
+        return column.elements.length
+      }
+      return 0;
+    },
     // maps the columns to the sparks
     mapSparks() {
       this.sparks.forEach( c => c.y = 0);         // clear the sparks
@@ -92,17 +117,17 @@ export default {
         if (this.activeColIndex >= this.columns.length) { this.activeColIndex = this.columns.length - 1}
         // the max is over ALL not just over the visible
         let maxVal = 0;
-        this.columns.forEach(x => {if (x.value > maxVal) {maxVal = x.value}});
+        this.columns.forEach(x => {if (this.elementCount(x) > maxVal) {maxVal = this.elementCount(x)}});
         // the this.index should be in the center
         let columnIndex = this.activeColIndex - Math.floor(this.sparkCount / 2);
         for (let index = 0; index < this.sparks.length; index++) {
           if (columnIndex >= 0 && columnIndex < this.columns.length) { // there is data for this column
-            this.sparks[index].y = Math.floor(this.sparkTop * (this.columns[columnIndex].value / maxVal) * .95)
+            this.sparks[index].y = Math.floor(this.sparkTop * (this.elementCount(this.columns[columnIndex]) / maxVal) * .95)
           }
           columnIndex++
         }
       }
-     // console.log('sparks:', this.sparks)
+      console.log('column count:', this.columns.length)
     },
 
     // user clicked on the spark line
@@ -180,9 +205,9 @@ interface TouchEvent {
     }
 
   },
-  mounted: function() {
-    console.log('render');
-    this.activeColIndex = this.activeColumn;
+  mounted: async function() {
+    // without this the store is not loaded
+    await this.$nextTick()
     this.generateSparks()
     this.mapSparks()
   }
