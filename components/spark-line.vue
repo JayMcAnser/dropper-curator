@@ -4,17 +4,20 @@
       app
   >
     <!--  v-on:mousemove="trackMouse" -->
+    <!--
+     v-touch="{
+           move: (e) =>track(e)
+          }"
+    -->
     <div id="spark-container"
          ref="spark"
          @click="sparkClick"
-
-
-         v-touch:swipe.left="swipeLeft"
-         v-touch:swipe.right="swipeRight"
+         v-on:mousemove="trackMouse"
+         v-touch="{
+           move: (e) =>trackTouch(e)
+          }"
     >
-        <svg id="spark" ref="spark" width="100%" height="100%"
-             v-touch:moving="track"
-        >
+        <svg id="spark" ref="spark" width="100%" height="100%">
           <line v-for="spark in sparks" :key="spark.index"
                :x1="spark.x" :y1="sparkTop" :x2="spark.x" :y2="spark.y + sparkTop" style="stroke:rgb(0,0,0);stroke-width:3" />
           <polygon :points="sparkMark" style="fill:rgb(74,118,210);stroke:rgb(74,118,210);stroke-width:1" />
@@ -27,6 +30,15 @@
 </template>
 
 <script>
+/*
+
+interface TouchEvent {
+  touchstartX: number
+  touchmoveX: number
+  stopPropagation: Function
+}
+
+ */
 export default {
   name: "SparkLine",
   props: {
@@ -109,10 +121,31 @@ export default {
         // console.log('user clicked on ', event)
       }
     },
-    track(event) {
-      console.log('track')
-      this.buttonState = `x: ${event.clientX}`
-      this.trackMouse(event)
+    /*
+
+interface TouchEvent {
+  touchstartX: number
+  touchmoveX: number
+  stopPropagation: Function
+}
+     */
+    // track the touchScreen
+    trackTouch(event) {
+      // event should be
+      // interface TouchEvent {
+      //   touchstartX: number
+      //   touchmoveX: number
+      //   stopPropagation: Function
+      // }
+      this.buttonState = `touch.x: ${event.touchmoveX}, m:${event.touchmoveX}`
+      let dif = event.touchmoveX
+      let margin = this.sparkStep / 2;
+      if (Math.abs(dif) > margin) { // we have to move
+        let change = Math.ceil(dif / margin);
+        this.activeColIndex += change;
+        this.mapSparks()
+        this.mouseStartPos = event.clientX;
+      }
     },
 
     // track mouse movement if pressed
