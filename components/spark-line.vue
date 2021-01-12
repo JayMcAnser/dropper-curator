@@ -160,7 +160,7 @@ export default {
         let change = Math.ceil(dif / margin);
         this.activeColIndex -= change;
         this.mapSparks()
-        this.mouseStartPos = this.mouseStartPos - event.touchmoveX
+        this.mouseStartPos =  event.touchmoveX
       }
     },
 
