@@ -166,7 +166,7 @@ export default {
         let change = Math.ceil(dif / margin);
         this.activeColIndex += change;
         this.mapSparks()
-        this.mouseStartPos = event.clientX;
+        // this.mouseStartPos = event.clientX;
       }
     },
 
