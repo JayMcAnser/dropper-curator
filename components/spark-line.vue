@@ -164,7 +164,7 @@ export default {
       let margin = this.sparkStep / 2;
       if (Math.abs(dif) > margin) { // we have to move
         let change = Math.ceil(dif / margin);
-        this.activeColIndex += change;
+        this.activeColIndex -= change;
         this.mapSparks()
         // this.mouseStartPos = event.clientX;
       }
