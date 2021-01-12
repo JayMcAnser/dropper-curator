@@ -3,12 +3,6 @@
       fixed
       app
   >
-    <!--  v-on:mousemove="trackMouse" -->
-    <!--
-     v-touch="{
-           move: (e) =>track(e)
-          }"
-    -->
     <div id="spark-container"
          ref="spark"
          @click="sparkClick"
@@ -25,7 +19,7 @@
           <polygon :points="sparkMark" style="fill:rgb(74,118,210);stroke:rgb(74,118,210);stroke-width:1" />
         </svg>
       <!-- <line x1="3" y1="0" x2="3" y2="800" style="stroke:rgb(0,0,0);stroke-width:2" /> -->
-      <a @click="generateSparks()">generate {{ buttonState }}</a>
+      <!-- <a @click="generateSparks()">generate {{ buttonState }}</a> -->
 
     </div>
   </v-app-bar>
