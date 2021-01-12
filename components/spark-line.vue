@@ -14,7 +14,9 @@
          @click="sparkClick"
          v-on:mousemove="trackMouse"
          v-touch="{
-           move: (e) =>trackTouch(e)
+           move: (e) => trackTouch(e),
+           start: (e) => mouseStartPos = e.touchstartX,
+           end: (e) => mouseStartPos = -1
           }"
     >
         <svg id="spark" ref="spark" width="100%" height="100%">
@@ -64,7 +66,7 @@ export default {
   },
   computed: {
     columns() {
-      console.log('get columns')
+      //console.log('get columns')
       return Column.query()
           .with('elements')
           .get();
@@ -74,7 +76,7 @@ export default {
         return this.$store.state.board.activeColumnIndex
       },
       set: function(index) {
-        console.log('set active', index)
+        //console.log('set active', index)
         this.$store.commit('board/activeIndex', index)
       }
     },
@@ -127,7 +129,7 @@ export default {
           columnIndex++
         }
       }
-      console.log('column count:', this.columns.length)
+//      console.log('column count:', this.columns.length)
     },
 
     // user clicked on the spark line
@@ -146,15 +148,10 @@ export default {
         // console.log('user clicked on ', event)
       }
     },
-    /*
 
-interface TouchEvent {
-  touchstartX: number
-  touchmoveX: number
-  stopPropagation: Function
-}
-     */
+
     // track the touchScreen
+    // could read the swipe out of it
     trackTouch(event) {
       // event should be
       // interface TouchEvent {
@@ -162,8 +159,8 @@ interface TouchEvent {
       //   touchmoveX: number
       //   stopPropagation: Function
       // }
-      this.buttonState = `touch.x: ${event.touchmoveX}, m:${event.touchmoveX}`
-      let dif = event.touchmoveX
+      this.buttonState = `touch.x: ${event.touchstartX}, m:${event.touchmoveX}`
+      let dif = event.touchmoveX - this.mouseStartPos
       let margin = this.sparkStep / 2;
       if (Math.abs(dif) > margin) { // we have to move
         let change = Math.ceil(dif / margin);
@@ -175,7 +172,7 @@ interface TouchEvent {
 
     // track mouse movement if pressed
     trackMouse(event) {
-      console.log('mouse')
+//      console.log('mouse')
       if (event.buttons === 1) {
         if (this.mouseStartPos === false) {
           this.mouseStartPos = event.clientX;
@@ -192,18 +189,7 @@ interface TouchEvent {
       } else if (this.mouseStartPos) {
         this.mouseStartPos = false
       }
-    },
-    swipeLeft(e) {
-      // this.buttonState = 'left'
-      // this.activeColIndex -= (this.sparkCount / 2) -2;
-      // this.mapSparks()
-    },
-    swipeRight(e) {
-      // this.buttonState = 'right'
-      // this.activeColIndex += (this.sparkCount / 2) -2;
-      // this.mapSparks()
     }
-
   },
   mounted: async function() {
     // without this the store is not loaded
