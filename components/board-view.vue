@@ -1,7 +1,5 @@
 <template>
-
   <div>
-    // boardview
     <column-view
         :column="column"
     ></column-view>
