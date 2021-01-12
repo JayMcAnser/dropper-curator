@@ -1,0 +1,9 @@
+{
+  "Path": {
+    "dataRoot": "api/data",
+    "imageRoot": "api/data/image"
+  },
+  "Board": {
+    "extension": ".json"
+  }
+}
