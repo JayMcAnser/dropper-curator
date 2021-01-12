@@ -1,6 +1,9 @@
 <template>
-  <div>
-    <img :src="element.imageUrl" />
+  <div class="img-container">
+    <img
+        class="lock-image"
+        :src="element.imageUrl"
+    />
   </div>
 </template>
 
@@ -14,5 +17,10 @@ export default {
 </script>
 
 <style scoped>
-
+  .img-container {
+    overflow: hidden;
+  }
+  .lock-image {
+    max-width: 100%;
+  }
 </style>
