@@ -7,7 +7,8 @@ const express = require('express');
 const logger = require('morgan');
 const bodyParser = require('body-parser');
 const users = require('./routes/users');
-const boards = require('./routes/boards')
+const boards = require('./routes/board')
+//const public = require('./routes/public')
 
 const app = express();
 
@@ -16,13 +17,15 @@ app.set('secretKey', 'DropperCurator'); // jwt secret token
 app.use(logger('dev'));
 app.use(bodyParser.urlencoded({extended: false}));
 
+
 app.get('/', function(req, res){
-  res.json({"tutorial" : "Build REST API with node.js"});
+  res.json({"message" : "Droper Curator API is active"});
 });
 
 // public route
-app.use('/users', users);
-app.use('/boards', boards)
+// app.use('/', public)
+app.use('/user', users);
+app.use('/board', boards)
 
 // express doesn't consider not found 404 as an error so we need to handle 404 explicitly
 // handle 404 error

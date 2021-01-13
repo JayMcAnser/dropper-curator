@@ -7,10 +7,11 @@
 
 const express = require('express');
 const router = express.Router();
-const boardController = require('../controllers/boards');
+const boardController = require('../controllers/board');
 
-
-router.post('/', boardController.create);
 router.get('/:name', boardController.open)
+router.post('/', boardController.create);
+router.put('', boardController.replace);
+
 
 module.exports = router;

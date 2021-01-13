@@ -4,7 +4,9 @@
   "description": "The api for Dropper Curator",
   "main": "index.js",
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "clear": "killall node",
+    "dev": "node src/index.js",
+    "test": "node --expose-internals ./node_modules/.bin/mocha $(find test -name '*spec.js') --exit --recursive"
   },
   "author": "Jay McAnser",
   "license": "MIT",

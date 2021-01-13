@@ -5,7 +5,7 @@ const assert = chai.assert;
 
 // must run init first because it load the wrong definition
 const init = require('./init-test');
-const Boards = require('../models/boards')
+const Board = require('../models/board')
 
 const TEST_BOARD = 'test.ctrl.board'
 const server = 'http://localhost:3000';
@@ -13,12 +13,12 @@ const server = 'http://localhost:3000';
 describe('controller.board', () => {
 
   before( async() => {
-    await Boards.delete(TEST_BOARD)
+    await Board.delete(TEST_BOARD)
   })
 
   it('create', () => {
     return chai.request(server)
-      .post('/boards')
+      .post('/board')
       .type('form')
       .send({name: TEST_BOARD, title:'Test Board'})
       .then((result) => {
@@ -28,9 +28,24 @@ describe('controller.board', () => {
 
   it('open', () => {
     return chai.request(server)
-      .get(`/boards/${TEST_BOARD}`)
+      .get(`/board/${TEST_BOARD}`)
       .then((result) => {
         assert.equal(result.status, 200)
+        assert.isDefined(result.body.data);
+        assert.equal(result.body.status, 'success')
+        assert.equal(result.body.data.title, 'Test Board')
+        assert.isDefined(result.body.data.id);
+      })
+  });
+
+  it('open - not found', async () =>{
+    return chai.request(server)
+      .get(`/board/${TEST_BOARD + '.not-found'}`)
+      .then((result) => {
+        assert.equal(result.status, 200)
+        assert.isDefined(result.body.data);
+        assert.equal(result.body.status, 'error')
+        assert.equal(result.body.message, 'board not found')
       })
   })
 })

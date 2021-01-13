@@ -1,6 +1,8 @@
 <template>
-  <div>
-    <p>{{ element.title }}</p>
+  <div >
+    <p v-if="element.title"
+       class="block title">{{ element.title }}</p>
+    <p class="block">{{element.text}}</p>
   </div>
 </template>
 
@@ -14,5 +16,11 @@ export default {
 </script>
 
 <style scoped>
-
+  .block {
+    margin: 5px;
+    padding: 5px;
+  }
+  .title {
+    font-weight: bold;
+  }
 </style>
