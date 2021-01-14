@@ -2,11 +2,17 @@
  * General purpose routines
  *
  * Version 2.0 => multipath
+ * version 2.1 => set rootPath
  */
 const Path = require('path');
 const Config = require('config');
 const fs = require('fs');
 const _ = require('lodash');
+
+let RelativePath = '../..';
+const setRelativePath = function(path) {
+  RelativePath = path;
+}
 
 /**
  * compares a value to an key in an object
@@ -131,7 +137,7 @@ const getFullPath = function(filename, options = {}) {
       return filename;
     }
     let path = [];
-    let relative = options.relativeTo !== undefined ? options.relativeTo : '../..'
+    let relative = options.relativeTo !== undefined ? options.relativeTo : RelativePath;
     if (options.rootKey || options.paths) {
       if (options.rootKey !== undefined && Config.has(options.rootKey)) {
         path = Config.get(options.rootKey);
@@ -149,7 +155,7 @@ const getFullPath = function(filename, options = {}) {
             subDirectory: options.subDirectory,
             extension: options.extension,
             makePath: false,
-            relativeTo: path[pathIndex][0] === '/' ? '' : '../..',
+            relativeTo: path[pathIndex][0] === '/' ? '' : RelativePath, // '../..',
             noExistsCheck: true
           })
           if (fs.existsSync(foundPath)) {
@@ -280,3 +286,4 @@ const removeComments = (values) => {
 module.exports.getFullPath = getFullPath;
 module.exports.patchConfig = patchConfig;
 module.exports.removeComments = removeComments;
+module.exports.setRelativePath = setRelativePath;

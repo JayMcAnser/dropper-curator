@@ -1,7 +1,12 @@
 {
+  "Server": {
+    "port": 3000,
+    "secretKey": "Dr0pper"
+  },
   "Path": {
-    "dataRoot": "api/data",
-    "imageRoot": "api/data/image"
+    "dataRoot": "data",
+    "imageRoot": "data/image",
+    "logRoot": "logging"
   },
   "Board": {
     "extension": ".json"
