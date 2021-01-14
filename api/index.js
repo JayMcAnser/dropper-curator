@@ -1,14 +1,14 @@
 /**
  * Dropper Curator App
- * @type {e | (() => Express)}
+ * free from: https://medium.com/zero-equals-false/building-a-restful-crud-api-with-node-js-jwt-bcrypt-express-and-mongodb-4e1fb20b7f3d
  */
 
 const express = require('express');
 const logger = require('morgan');
 const bodyParser = require('body-parser');
-const users = require('./routes/users');
-const boards = require('./routes/board')
-//const public = require('./routes/public')
+const user = require('./routes/user');
+const board = require('./routes/board')
+const public = require('./routes/public')
 
 const app = express();
 
@@ -19,13 +19,13 @@ app.use(bodyParser.urlencoded({extended: false}));
 
 
 app.get('/', function(req, res){
-  res.json({"message" : "Droper Curator API is active"});
+  res.json({status:"success", "message" : "Droper Curator API is active"});
 });
 
 // public route
-// app.use('/', public)
-app.use('/user', users);
-app.use('/board', boards)
+ app.use('/public', public)
+app.use('/user', user);
+app.use('/board', board)
 
 // express doesn't consider not found 404 as an error so we need to handle 404 explicitly
 // handle 404 error

@@ -46,11 +46,26 @@ module.exports = {
       return true;
     })
   },
-  async findAll() {
+  async findAll(isPublic = false) {
     let rootDir = Helper.getFullPath('', {rootKey:'Path.dataRoot'})
     let tmpFiles = Fs.readdirSync(rootDir);
-    let files = tmpFiles.filter((f) => f.substr(f.length - Config.get('Board.extension').length) === Config.get('Board.extension'))
+    let files = tmpFiles.filter((f) => f.substr(f.length - Config.get('Board.extension').length) === Config.get('Board.extension'));
+
+    if (isPublic) {
+      for (let index = files.length - 1 ; index >= 0; index--) {
+        let filename = Path.join(rootDir, files[index]);
+        try {
+          let data = await JsonFile.readFile(filename)
+          if (!data.isPublic) {
+            files.splice(index, 1)
+          }
+        } catch(e) {
+          files.splice(index, 1)
+        }
+      }
+    }
     files.forEach( (f, key) => files[key] = f.substring(0, f.length - Config.get('Board.extension').length) )
+
     return files;
   },
 

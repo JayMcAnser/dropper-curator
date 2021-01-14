@@ -5,7 +5,7 @@ const assert = chai.assert;
 const Board = require('../models/board');
 
 
-describe('models.boards', () => {
+describe('models.board', () => {
 
   const TEST_NAME = 'test-board';
   before( async () => {
