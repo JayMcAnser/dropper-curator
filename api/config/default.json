@@ -8,6 +8,10 @@
     "imageRoot": "data/image",
     "logRoot": "logging"
   },
+  "Logging": [
+    { "format":  "dev" },
+    { "format":  "tiny", "filename": "test.log"}
+  ],
   "Board": {
     "extension": ".json"
   }

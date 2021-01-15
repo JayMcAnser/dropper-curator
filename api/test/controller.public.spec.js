@@ -1,10 +1,12 @@
+
+const init = require('./init-test');
 const chai = require('chai');
 const chaiHttp = require('chai-http'); //types');
 chai.use(chaiHttp);
 const assert = chai.assert;
 
 // must run init first because it load the wrong definition
-const init = require('./init-test');
+
 const Board = require('../models/board')
 
 const TEST_BOARD_PUBLIC = 'test.ctrl.board.public'

@@ -4,18 +4,32 @@
  */
 
 const express = require('express');
-const logger = require('morgan');
+const Morgan = require('morgan');
 const bodyParser = require('body-parser');
 const Config = require('config');
+const Fs = require('fs');
 const Helper = require('./lib/helper');
 Helper.setRelativePath('..'); // src is not in subdirectory but in the main root
 
 const app = express();
 
-app.use(logger('dev'));
-app.use(bodyParser.urlencoded({extended: false}));
 
 let logFile = Helper.getFullPath('test.log', {rootKey: 'Path.logRoot', noWarn: true, alwaysReturnPath: true})
+let logger = Config.get('Logging');
+for (let index = 0; index < logger.length; index++) {
+  let options = {};
+  if (logger[index].filename) {
+    options.stream = Fs.createWriteStream(
+      Helper.getFullPath('test.log', {rootKey: 'Path.logRoot', noWarn: true, alwaysReturnPath: true, makePath: true}),
+      { flags: 'a'}
+    )
+  }
+  app.use(Morgan(
+    logger[index].format ? logger[index].format : 'tiny',
+     options));
+}
+
+app.use(bodyParser.urlencoded({extended: false}));
 
 app.get('/', function(req, res){
   res.json({status:"success", "message" : "Droper Curator API is active"});
@@ -48,5 +62,9 @@ app.use(function(err, req, res, next) {
 let listener = app.listen(Config.get('Server.port'),
   function() {
     console.log(`Node server (http://localhost:${Config.get('Server.port')} listening on port ${Config.get('Server.port')}`);
+    // after all initialization start test / runner
+    // app.emit('serverReady');
   }
 );
+
+module.exports = app;
