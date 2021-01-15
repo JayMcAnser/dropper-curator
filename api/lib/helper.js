@@ -178,7 +178,11 @@ const getFullPath = function(filename, options = {}) {
           return primaryPath        }
         if (!options.returnPaths && !options.noWarn) {
           const Logging = require('./logging');
-          Logging.warn(`[helper] the file ${filename}${options.extension ? options.extension : ''} does not exist`);
+          if (Logging.warn) { // v1
+            Logging.warn(`[helper] the file ${filename}${options.extension ? options.extension : ''} does not exist`);
+          } else {
+            Logging.log('warn', `[helper] the file ${filename}${options.extension ? options.extension : ''} does not exist`)
+          }
         }
         return false;
       }

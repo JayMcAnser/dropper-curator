@@ -1,28 +1,116 @@
 
 
-const USERS = [
-  {id: 1, name: 'Jaap', email: 'jaap@toxus.nl', password: '12345'},
-  {id: 2, name: 'Pier', email: 'gjptaylor@gmail.com', password: '12345'}
-]
 
+const Bcrypt = require('bcrypt');
+const Jwt = require('jsonwebtoken');
+const Config = require('config')
+const Const = require('../lib/const')
+const Jsonfile = require('jsonfile');
+const Helper = require('../lib/helper');
+const { v4 : uuidv4} = require('uuid');
 
+let USERS = [];
+let UserFilename = false
+const _loadUsers = function() {
+  if (USERS.length === 0) {
+    UserFilename = Helper.getFullPath('users.json', { rootKey: 'Path.dataRoot'})
+    USERS = Jsonfile.readFileSync(UserFilename)
+  }
+}
+// must inialize
+_loadUsers();
 
 module.exports = {
-  create: function(req, res, next) {
-    res.json({status:"error", message: 'user.create not implemented', data:null})
+
+  create: async function(user) {
+
+//    res.json({status:"error", message: 'user.create not implemented', data:null})
+    let usr = await this.findOne({email: user.email});
+    if (usr) {
+      throw new Error(`user already exists`)
+    }
+    if (user.id === undefined) {
+      user.id = uuidv4();
+    }
+    USERS.push(user);
+    Jsonfile.writeFileSync(Helper.getFullPath('users.json', { rootKey: 'Path.dataRoot'}), USERS)
+    return user;
   },
 
-  async findOne(what) {
+  _filter(obj, where) {
+    if (Object.keys(where).length === 0) {
+      throw new Error(`[_filter] object has no values`)
+    }
+    for (let key in where) {
+      if (!where.hasOwnProperty(key)) { continue }
+      if (obj[key] !== where[key]) {
+        return false;
+      }
+    }
+    return true;
+  },
+
+  /**
+   * delete a user defined by the where
+   * @param where
+   * @returns {boolean}
+   */
+  delete(where) {
+    let index = USERS.findIndex( (a) => { return this._filter(a, where)})
+    if (index >= 0) {
+      USERS.splice(index, 1);
+      Jsonfile.writeFileSync(UserFilename, USERS);
+      return true;
+    }
+    return false;
+  },
+
+  /**
+   * find one record
+   *
+   * @param what object holding the values of the found user
+   * @returns {Promise<Object | false>}>}
+   */
+  findOne: async function(what) {
+    // _loadUsers();
     return USERS.find( (u) => {
-      for (let key in what) {
-        if (!what.hasOwnProperty(key)) { continue }
-        if (!what[key] === undefined || u[key].toUpperCase() !== what[key].toUpperCase()) {
-          return false
+      return this._filter(u, what)
+    }) || false
+  },
+
+  /**
+   * find the user by the id
+   * @param id
+   * @returns {*|boolean}
+   */
+  findById(id) {
+    return USERS.find( (u) => {
+      return this._filter(u, {id: id})
+    }) || false   // should return false not undefined
+  },
+
+  /**
+   * validate the user against the encrypted key
+   * @param req
+   * @param res
+   * @param next
+   */
+  validate(req, res, next) {
+    Jwt.verify(
+      req.headers['x-access-token'],
+      Config.get('Server.secretKey'),
+      function(err, decoded) {
+        if (err) {
+          res.json({status: Const.status.error, message: err.message, data: null})
+        } else {
+          req.body.userId = decoded.id;
+          // do any session initialisation like the Logging
+          next();
         }
       }
-      return true;
-    })
+    )
   }
 
 
 }
+

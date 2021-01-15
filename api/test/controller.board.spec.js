@@ -7,7 +7,7 @@ const assert = chai.assert;
 const init = require('./init-test');
 const Board = require('../models/board')
 
-const TEST_BOARD = 'test.ctrl.board'
+const TEST_BOARD = 'test.ctrl'
 const server = 'http://localhost:3000';
 
 describe('controller.board', () => {

@@ -9,10 +9,11 @@
     "logRoot": "logging"
   },
   "Logging": [
-    { "format":  "dev" },
-    { "format":  "tiny", "filename": "test.log"}
+    { "type": "access", "format":  "dev" },
+    { "type": "access", "format":  "tiny", "filename": "test.log"},
+    { "type": "console", "level": "debug", "colorize": true, "format": "timestamp"}
   ],
   "Board": {
-    "extension": ".json"
+    "extension": ".board.json"
   }
 }

@@ -9,8 +9,8 @@ const assert = chai.assert;
 
 const Board = require('../models/board')
 
-const TEST_BOARD_PUBLIC = 'test.ctrl.board.public'
-const TEST_BOARD_PRIVATE = 'test.ctrl.board.private'
+const TEST_BOARD_PUBLIC = 'test.ctrl.public'
+const TEST_BOARD_PRIVATE = 'test.ctrl.private'
 const server = 'http://localhost:3000';
 const ROOT = '/public';
 const Const = require('../lib/const')
