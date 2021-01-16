@@ -12,13 +12,15 @@ describe('models.user', () => {
 
   const TEST_NAME = 'test-user';
   const TEST_EMAIL = 'test@example.com'
-  const TEST_PASSWORD = 'password';
+  const TEST_PASSWORD = '12345';
   let id;
 
   before(async () => {
     try {
+      let token = await init.AuthToken
       await User.delete({email: TEST_EMAIL})
     } catch (e) {
+      console.log(e)
     }
   })
 

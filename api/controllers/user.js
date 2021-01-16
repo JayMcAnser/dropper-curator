@@ -29,20 +29,29 @@ module.exports = {
    * @param next
    * @returns {Promise<*>}
    */
-  authenticate: async function(req, res, next) {
-    let userInfo = await userModel.findOne({email: req.body.email}) ;
-    if (!userInfo) {
-      return res.json({status: Const.status.error, message: "invalid email/password!", data:null});
-    }
-    //if(bcrypt.compareSync(req.body.password, userInfo.password)) {
-    if (userInfo.password === req.body.password) {
-      const token = jwt.sign({id: userInfo.id}, Config.get('Server.secretKey'), { expiresIn: '1h' });
-      res.json({status: Const.status.success, message: "user found", data:{
-        user: userInfo,
-          token:token
-      }});
-    } else {
-      res.json({status: Const.status.error, message: "invalid email/password", data:null});
-    }
+  authenticate: function(req, res, next) {
+
+      return userModel.findOne({email: req.body.email}).then((userInfo) => {
+        try {
+          if (!userInfo) {
+            res.json({status: Const.status.error, message: "invalid email/password!", data: null});
+          } else {
+            //if(bcrypt.compareSync(req.body.password, userInfo.password)) {
+            if (userInfo.password === req.body.password) {
+              const token = jwt.sign({id: userInfo.id}, Config.get('Server.secretKey'), {expiresIn: '1h'});
+              res.json({
+                status: Const.status.success, message: "user found", data: {
+                  user: userInfo,
+                  token: token
+                }
+              });
+            } else {
+              res.json({status: Const.status.error, message: "invalid email/password", data: null});
+            }
+          }
+        } catch (e) {
+          console.error(`[user.authenticate] ${e.message}`)
+        }
+      })
   },
 }
