@@ -1,12 +1,12 @@
 /**
  * testing the user definition
  */
-const init = require('./init-test');
+const Init = require('./init-test');
 const chai = require('chai');
 const assert = chai.assert;
 
 const User = require('../models/user');
-
+const Const = require('../lib/const');
 
 describe('models.user', () => {
 
@@ -17,7 +17,7 @@ describe('models.user', () => {
 
   before(async () => {
     try {
-      let token = await init.AuthToken
+      let token = await Init.AuthToken
       await User.delete({email: TEST_EMAIL})
     } catch (e) {
       console.log(e)
@@ -64,5 +64,54 @@ describe('models.user', () => {
   it ('findById - not found', async () => {
     let user = await User.findById(id + 'asdf');
     assert.isFalse(user)
-  })
+  });
+
+  it('validate user', async() => {
+    let req = {
+      headers: {'x-access-token': await Init.AuthToken},
+      body : {}
+    }
+    let res = {
+      obj: {},
+      json: function(obj) { this.obj = obj}
+    }
+    let result = await User.validate(
+      req,
+      res);
+    assert.isDefined(req.body.user);
+    assert.equal(req.body.user.email, Init.AuthEmail);
+  });
+
+
+  it('validate user - wrong token', async() => {
+    let req = {
+      headers: {'x-access-token': 'WRONG TOKEN'},
+      body : {}
+    }
+    let res = {
+      obj: {},
+      json: function(obj) { this.obj = obj}
+    }
+    let result = await User.validate(
+      req,
+      res);
+    assert.isDefined(res.obj.status);
+    assert.equal(res.obj.status, Const.status.error)
+  });
+
+  it('validate user - missing token', async() => {
+    let req = {
+      body : {}
+    }
+    let res = {
+      obj: {},
+      json: function(obj) { this.obj = obj}
+    }
+    let result = await User.validate(
+      req,
+      res);
+    assert.isDefined(res.obj.status);
+    assert.equal(res.obj.status, Const.status.error)
+  });
+
 });

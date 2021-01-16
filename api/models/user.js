@@ -83,7 +83,7 @@ module.exports = {
    * @param id
    * @returns {*|boolean}
    */
-  findById(id) {
+  async findById(id) {
     return USERS.find( (u) => {
       return this._filter(u, {id: id})
     }) || false   // should return false not undefined
@@ -95,22 +95,18 @@ module.exports = {
    * @param res
    * @param next
    */
-  validate(req, res, next) {
-    Jwt.verify(
-      req.headers['x-access-token'],
-      Config.get('Server.secretKey'),
-      function(err, decoded) {
-        if (err) {
-          res.json({status: Const.status.error, message: err.message, data: null})
-        } else {
-          req.body.userId = decoded.id;
-          // do any session initialisation like the Logging
-          next();
-        }
-      }
-    )
+  async validate(req, res) {
+    let vm = this;
+    let token = req.headers ? req.headers['x-access-token'] : '--missing-token--'
+    try {
+      let decoded = Jwt.verify(
+        token,
+        Config.get('Server.secretKey'));
+
+      req.body.user = await vm.findById(decoded.id);
+    } catch (err) {
+      res.json({status: Const.status.error, message: err.message, data: null})
+    }
   }
-
-
 }
 
