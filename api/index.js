@@ -16,10 +16,12 @@ app.get('/', function(req, res){
   res.json({status:"success", "message" : "Droper Curator API is active"});
 });
 
+const AuthController = require('./controllers/auth');
+
 app.use('/auth', require('./routes/auth'));
 app.use('/public',  require('./routes/public'));
-app.use('/user',    require('./routes/user'));
-app.use('/board',   require('./routes/board'));
+app.use('/user',  AuthController.validate,  require('./routes/user'));
+app.use('/board', AuthController.validate,  require('./routes/board'));
 
 // express doesn't consider not found 404 as an error so we need to handle 404 explicitly
 // handle 404 error

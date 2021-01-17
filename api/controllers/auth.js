@@ -57,17 +57,26 @@ module.exports = {
    * @param res
    * @param next
    */
-  async validate(req, res) {
-    let token = req.headers ? req.headers['x-access-token'] : '--missing-token--'
+  async validate(req, res, next) {
     try {
-      let decoded = Jwt.verify(
-        token,
-        Config.get('Server.secretKey'));
+      let token = req.headers && req.headers['authorization'] ? req.headers['authorization'] : ''
+      try {
+        let decoded = Jwt.verify(
+          token,
+          Config.get('Server.secretKey'));
 
-      req.body.user = await UserModel.findById(decoded.id);
-      res.json({status: Const.status.success, message: 'user logged in', data: null})
-    } catch (err) {
-      res.json({status: Const.status.error, message: err.message, data: null})
+        req.body.user = await UserModel.findById(decoded.id);
+      //  res.json({status: Const.status.success, message: 'user logged in', data: null})
+        next()
+      } catch (err) {
+        if (!token) {
+          res.json({status: Const.status.error, message: Const.results.accessDenied, data: null})
+        } else {
+          res.json({status: Const.status.error, message: err.message, data: null})
+        }
+      }
+    } catch(e) {
+      res.json({status: Const.status.error, message: `[authController.validate] ${r.message}`, data: null})
     }
   }
 }
