@@ -41,5 +41,15 @@ module.exports.AuthToken = new Promise((resolve, reject) => {
   })
 });
 
+module.exports.AuthUserId = new Promise((resolve) => {
+  return User.findOne({email: EMAIL}).then( async(user) => {
+    if (!user) {
+      user = await User.create({name: 'test', email: EMAIL, password: PASSWORD})
+    }
+    resolve(user.id);
+  })
+})
+
+
 module.exports.AuthEmail = EMAIL;
 module.exports.AuthPassword = PASSWORD;

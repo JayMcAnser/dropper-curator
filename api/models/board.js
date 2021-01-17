@@ -12,90 +12,219 @@ const Path = require('path');
 const Helper = require('../lib/helper');
 const { v4 : uuidv4} = require('uuid');
 const JsonFile = require('jsonfile');
+const Const = require('../lib/const')
+const Logging = require('../lib/logging');
 
 module.exports = {
   _rootDir() {
     return Helper.getFullPath('', {rootKey:'Path.dataRoot'})
   },
 
-  create: async function(board) {
-    if (board.name === undefined) {
-      throw new Error('board.filename is required');
+  _validateSession: function(session) {
+    if (!session.userId) {
+      throw new Error(`[board] ${Const.results.missingSession}`);
     }
-
-    let filename = Helper.getFullPath(board.name, {rootKey: 'Path.dataRoot', extension: Config.get('Board.extension')});
-    if (Fs.existsSync(filename)) {
-      throw new Error('the file already exists');
-    }
-    if (board.id === undefined) {
-      board.id = uuidv4()
-    }
-    return JsonFile.writeFile(filename, board).then(() => {
-      return board;
-    });
   },
 
-  async findOne(what) {
-    return USERS.find( (u) => {
+  _loadBoards: function(session, all= true) {
+    let dirName = Helper.getFullPath('', {  rootKey: 'Path.dataRoot'})
+    let boardIds = Fs.readdirSync(dirName);
+    boardIds = boardIds.filter( (dirent) => {
+      return Fs.statSync(Path.join(dirName, dirent)).isDirectory()
+    })
+
+    let boards = []
+    for (let index = 0; index < boardIds.length; index++) {
+      try {
+        let board = JsonFile.readFileSync(Path.join(dirName, boardIds[index], Config.get('Board.indexFilename')));
+        if (board.ownerId === session.userId ||
+          board.isPublic ||
+          board.users.findIndex( (u) => u.userId === session.userId) >= 0) {
+          boards.push({
+            id: boardIds[index],
+            name: board.name,
+            title: board.title,
+            isPublic: board.isPublic
+          })
+        }
+      } catch (e) {
+        Logging.log('warn', `opening baord ${boardIds[index]} returns an error: ${e.message}`)
+      }
+    }
+    return boards;
+  },
+
+  create: async function(session, board) {
+    this._validateSession(session);
+
+    if (board.name === undefined) {1
+      throw new Error(`[board] ${Const.results.boardNameRequired}`);
+    }
+    // check the name in unique
+    let b = await this.findOne(session, { name: board.name})
+    if (b) {
+      throw new Error(`[board] ${Const.results.boardExists}`);
+    };
+
+    let boardStore = {
+      id: uuidv4(),
+      name: board.name,
+      title: board.title ? board.title: board.name,
+      ownerId: session.userId,
+      isPublic: false,
+      users: [],
+      history: [{userId: session.userId, date: Date.now(), type: 'created'}],
+      columns: board.columns ? board.columns: []
+    }
+
+    let filename = Helper.getFullPath(Config.get('Board.indexFilename'),{
+      rootKey: 'Path.dataRoot',
+      subDirectory: boardStore.id,
+      makePath: true, returnPaths: true})
+    let result = await JsonFile.writeFile(filename, boardStore);
+    //ToDo: we should register our board to in the database
+    Fs.mkdirSync(Path.join(Path.dirname(filename), 'media'))
+    return boardStore.id
+  },
+
+  async findOne(session, what) {
+    this._validateSession(session);
+    let boards = this._loadBoards(session)
+    return boards.find( (u) => {
       for (let key in what) {
         if (!what.hasOwnProperty(key)) { continue }
-        if (!what[key] === undefined || u[key].toUpperCase() !== what[key].toUpperCase()) {
+        if (what[key] === undefined || u[key] != what[key]) {
           return false
         }
       }
       return true;
     })
   },
-  async findAll(isPublic = false) {
-    let rootDir = Helper.getFullPath('', {rootKey:'Path.dataRoot'})
-    let tmpFiles = Fs.readdirSync(rootDir);
-    let files = tmpFiles.filter((f) => f.substr(f.length - Config.get('Board.extension').length) === Config.get('Board.extension'));
 
-    if (isPublic) {
-      for (let index = files.length - 1 ; index >= 0; index--) {
-        let filename = Path.join(rootDir, files[index]);
-        try {
-          let data = await JsonFile.readFile(filename)
-          if (!data.isPublic) {
-            files.splice(index, 1)
+  async findById(session, id) {
+    this._validateSession(session);
+    let filename = Helper.getFullPath(Config.get('Board.indexFilename'), { rootKey: 'Path.dataRoot', subDirectory: id, alwaysReturnPath: true})
+    if (Fs.existsSync(filename)) {
+      return JsonFile.readFileSync(filename)
+    }
+    throw new Error(Const.results.boardNotFound);
+  },
+  /**
+   * retrieve all boards allowed
+   *
+   * @param session
+   * @param filter  {name | title | isPublic}
+   * @returns {Promise<[]>}
+   */
+  async findAll(session, filter = false) {
+    this._validateSession(session);
+
+    let boards = this._loadBoards(session)
+    if (filter) {
+      return boards.find( (u) => {
+        for (let key in whfilterat) {
+          if (!filter.hasOwnProperty(key)) { continue }
+          if (!filter[key] === undefined || u[key] != filter[key]) {
+            return false
           }
-        } catch(e) {
-          files.splice(index, 1)
         }
+        return true;
+      })
+    }
+    return boards;
+  },
+
+  /**
+   * one a board
+   *
+   * @param session
+   * @param name Object | string Object is the board self (inc id and name). string: id
+   * @returns {Promise<*>}
+   * @private
+   */
+  async _read(session, name) {
+    let board;
+    if (typeof name === 'string') {
+      board = await this.findById(session, name);
+    } else {
+      board = await this.findOne(session,{name:  name.name});
+    }
+    if (board) {
+      let filename = Helper.getFullPath(Config.get('Board.indexFilename'), {
+        rootKey: 'Path.dataRoot',
+        subDirectory: board.id
+      })
+      if (Fs.existsSync(filename)) {
+        return JsonFile.readFile(filename);
       }
     }
-    files.forEach( (f, key) => files[key] = f.substring(0, f.length - Config.get('Board.extension').length) )
-
-    return files;
+    throw new Error(Const.results.boardNotFound);
   },
-
-  async open(name) {
-    let filename = Helper.getFullPath(name, {rootKey: 'Path.dataRoot', extension: Config.get('Board.extension')})
+  /**
+   * lowlevel writing a board
+   *
+   * @param session
+   * @param board
+   * @returns {Promise<*>}
+   * @private
+   */
+  async _write(session, board) {
+    let filename = Helper.getFullPath(Config.get('Board.indexFilename'), {
+      rootKey: 'Path.dataRoot',
+      subDirectory: board.id
+    });
     if (Fs.existsSync(filename)) {
-      return JsonFile.readFile(filename);
-    } else {
-      throw new Error('board not found')
+      return JsonFile.writeFile(filename, board);
     }
-  },
-
-  async save(board) {
-    if (board.name === undefined) {
-      throw new Error('board has no name')
-    }
-    let filename = Helper.getFullPath(board.name, {rootKey: 'Path.dataRoot', extension: Config.get('Board.extension')})
-    if (!Fs.existsSync(filename)) {
-      throw new Error('board does not exist')
-    }
-    return JsonFile.writeFile(filename, board).then( x => {
-      return board;
-    })
+    throw new Error(Const.results.boardNotFound)
   },
 
 
-  async delete(boardName) {
-    let filename = Helper.getFullPath(boardName,{rootKey: 'Path.dataRoot', extension: Config.get('Board.extension')});
-    if (Fs.existsSync(filename)) {
-      Fs.unlinkSync(filename)
+  async open(session, name) {
+    this._validateSession(session);
+    let raw = await this._read(session, {name: name});
+    return {
+      id: raw.id,
+      title: raw.title,
+      name: raw.name,
+      isPublic: raw.isPublic,
+      columns: raw.columns
+    }
+  },
+
+  /**
+   * saving a board is only saving the group information
+   * @param session
+   * @param board Object
+   * @returns {Promise<void>}
+   */
+  async save(session, board) {
+    this._validateSession(session);
+    let boardDef = await this._read(session, board.id)
+    boardDef.columns = board.columns;
+    return this._write(session, boardDef, { spaces: 2, EOL: '\r\n' })
+  },
+
+  /**
+   * set the view right for a board
+   * @param session
+   * @param board
+   * @param isPublic
+   * @returns {Promise<void>}
+   */
+  async setPublic(session, board, isPublic) {
+    this._validateSession(session);
+    let boardDef = await this._read(session, board)
+    boardDef.isPublic = !!isPublic
+    return this._write(session, boardDef, { spaces: 2, EOL: '\r\n' })
+  },
+
+  async delete(session, boardName) {
+    this._validateSession(session);
+    let board = await this.findOne(session, {name: boardName});
+    if (board) {
+      const Rimraf = require('rimraf');
+      Rimraf.sync(Helper.getFullPath(board.id,{rootKey: 'Path.dataRoot'}));
     }
     return true;
   }

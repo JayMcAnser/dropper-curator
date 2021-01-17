@@ -66,6 +66,7 @@ module.exports = {
           Config.get('Server.secretKey'));
 
         req.body.user = await UserModel.findById(decoded.id);
+        req.session = { user: await UserModel.findById(decoded.id)}
       //  res.json({status: Const.status.success, message: 'user logged in', data: null})
         next()
       } catch (err) {

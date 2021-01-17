@@ -33,7 +33,7 @@ module.exports = {
       user.id = uuidv4();
     }
     USERS.push(user);
-    Jsonfile.writeFileSync(Helper.getFullPath('users.json', { rootKey: 'Path.dataRoot'}), USERS)
+    Jsonfile.writeFileSync(Helper.getFullPath('users.json', { rootKey: 'Path.dataRoot'}), USERS, { spaces: 2, EOL: '\r\n' })
     return user;
   },
 

@@ -17,7 +17,8 @@ describe('controller.board', () => {
     let token;
     before( async() => {
       token = await Init.AuthToken;
-      await Board.delete(TEST_BOARD)
+      let session = {userId: await Init.AuthUserId};
+      await Board.delete(session, TEST_BOARD)
     })
 
     it('create', () => {
@@ -28,7 +29,7 @@ describe('controller.board', () => {
         .send({name: TEST_BOARD, title:'Test Board'})
         .then((result) => {
           assert.equal(result.status, 200)
-          assert.equal(result.body.status, Const.status.success);
+          assert.equal(result.body.status, Const.status.success, result.body.message);
         })
     })
 
@@ -61,7 +62,8 @@ describe('controller.board', () => {
 
   describe('without login', () => {
     before( async() => {
-      await Board.delete(TEST_BOARD)
+      let session = {userId: await Init.AuthUserId};
+      await Board.delete(session, TEST_BOARD)
     })
 
     it('create', () => {
