@@ -20,14 +20,14 @@ module.exports.AuthToken = new Promise((resolve, reject) => {
       user = User.create({name:'test', email: EMAIL, password: PASSWORD})
     }
 
-    const UserController = require('../controllers/user');
+    const AuthController = require('../controllers/auth');
     // trick the auth in thinking we are a express
     let res = {
       _obj: {},
       json: function(obj) {this._obj = obj}
     };
 
-    return UserController.authenticate(
+    return AuthController.authenticate(
       { body: {email: EMAIL, password: PASSWORD} },
       res,
       (err) => { console.error(err)}
@@ -35,7 +35,7 @@ module.exports.AuthToken = new Promise((resolve, reject) => {
       if (res._obj.status === 'success') {
         return resolve(res._obj.data.token)
       } else {
-        return false;
+        return resolve(false);
       }
     });
   })

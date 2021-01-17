@@ -89,24 +89,5 @@ module.exports = {
     }) || false   // should return false not undefined
   },
 
-  /**
-   * validate the user against the encrypted key
-   * @param req
-   * @param res
-   * @param next
-   */
-  async validate(req, res) {
-    let vm = this;
-    let token = req.headers ? req.headers['x-access-token'] : '--missing-token--'
-    try {
-      let decoded = Jwt.verify(
-        token,
-        Config.get('Server.secretKey'));
-
-      req.body.user = await vm.findById(decoded.id);
-    } catch (err) {
-      res.json({status: Const.status.error, message: err.message, data: null})
-    }
-  }
 }
 
