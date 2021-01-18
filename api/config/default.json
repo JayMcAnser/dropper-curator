@@ -10,7 +10,7 @@
   },
   "Logging": [
     { "type": "access", "format":  "dev" },
-    { "type": "access", "format":  "tiny", "filename": "test.log"},
+    { "type": "access", "format":  "tiny", "filename": "access.curator.log"},
     { "type": "console", "level": "debug", "colorize": true, "format": "timestamp"}
   ],
   "Board": {

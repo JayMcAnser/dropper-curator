@@ -13,9 +13,17 @@ const Helper = require('./helper');
 Helper.setRelativePath('..');
 
 let _winston = false;
-// the levels that are used in winston
-let _winstonLogLevels = {};
-
+// when to display the log message
+let _maxLevel = -1;
+const LOG_LEVELS = {
+  error: 0,
+  warn: 1,
+  info: 2,
+  http: 3,
+  verbose: 4,
+  debug: 5,
+  silly: 6
+}
 
 const _formatByName = function(name) {
   const formats = {
@@ -41,33 +49,31 @@ const _formatByName = function(name) {
   }
   return undefined
 }
-/**
- * initialize the loggers
- *
- * @param app
- */
-const init = function(app) {
+
+const buildLog = function(logDefinition, app = false) {
   let transports = [];
-  let logger = Config.get('Logging');
-  for (let index = 0; index < logger.length; index++) {
-    let log = logger[index];
+
+  for (let index = 0; index < logDefinition.length; index++) {
+    let log = logDefinition[index];
     if (['access'].indexOf(log.type) >= 0) {
-      // this type of logging uses morgan
-      let options = {};
-      if (logger[index].filename) {
-        options.stream = Fs.createWriteStream(
-          Helper.getFullPath(logger[index].filename, {
-            rootKey: 'Path.logRoot',
-            noWarn: true,
-            alwaysReturnPath: true,
-            makePath: true
-          }),
-          {flags: 'a'}
-        )
+      if (app) { // only on initialization
+        // this type of logging uses morgan
+        let options = {};
+        if (log.filename) {
+          options.stream = Fs.createWriteStream(
+            Helper.getFullPath(log.filename, {
+              rootKey: 'Path.logRoot',
+              noWarn: true,
+              alwaysReturnPath: true,
+              makePath: true
+            }),
+            {flags: 'a'}
+          )
+        }
+        app.use(Morgan(
+          log.format ? log.format : 'tiny',
+          options));
       }
-      app.use(Morgan(
-        logger[index].format ? logger[index].format : 'tiny',
-        options));
     } else {
       // use the winston log
       let format = _formatByName(`${log.type}.${log.format}`)
@@ -118,14 +124,31 @@ const init = function(app) {
           console.warn(`unknown log type: ${log.type}`);
       }
       // mark we are going to log to this level
-      _winstonLogLevels[log.level ? log.level: 'info'] = true;
+
+      let tmpLevel = log.level ? log.level: 'info';
+      if (!LOG_LEVELS[tmpLevel]) {
+        console.error(`unknown logging level: ${tmpLevel}. uses one of ${Object.keys(LOG_LEVELS).join(', ')}`)
+      } else if (_maxLevel < LOG_LEVELS[tmpLevel]) {
+        _maxLevel = LOG_LEVELS[tmpLevel]
+      }
     }
   }
+
   if (transports.length) {
-    this._winston = Winston.createLogger({
+    return Winston.createLogger({
       transports
     });
   }
+  return false; // no logging at all
+}
+/**
+ * initialize the loggers
+ *
+ * @param app
+ */
+const init = function(app) {
+  let logger = Config.get('Logging');
+  this._winston = buildLog(logger, app);
 }
 
 /**
@@ -138,17 +161,31 @@ const init = function(app) {
  *   logger.log('console', () => { return 'this take a long time'} )) // prints out the message only on console and higher
  */
 const _log = function(level, message) {
-  if (this._winston) {
+  write(this._winston, level, message);
+}
+
+const write = function(log, level, message) {
+  if (log) {
     if (typeof message === 'function') {
-      if (this._winstonLogLevels[level] === undefined) {
+      let mustLogMessage = false;
+      if (LOG_LEVELS[level] === undefined) {
+        console.error(`unknown log level: ${level}`)
+        mustLogMessage = true;
+      } else if (LOG_LEVELS[level] <= _maxLevel) {
+        mustLogMessage = true;
+      }
+      if (!mustLogMessage) {
         return;
       }
       message = message();
     }
-    this._winston.log(level, message)
+    log.log(level, message)
   }
 }
 
 module.exports.init = init;
-module.exports.winston = _winston;
+module.exports.winston = _winston; // not used any more
+module.exports.default = _winston;
 module.exports.log = _log;
+module.exports.buildLog = buildLog
+module.exports.write = write;
