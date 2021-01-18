@@ -2,7 +2,10 @@ const boardModel = require('../models/board');
 const Const = require('../lib/const');
 
 const _getSession = function(req) {
-  return {userId: req.session.user.id}
+  return {
+    userId: req.session.user.id,
+    log: req.session.log
+  }
 }
 
 module.exports = {
