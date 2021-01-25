@@ -2,7 +2,7 @@
   <div class="ma-4">
     <div class="d-flex flex-row mb-2">
       <div>
-        <h2>Virtual phone layouts</h2>
+        <h2>Virtual phone layouts {{ $config.baseURL }} {{  active }}</h2>
         <ul>
           <li v-for="(phone, index) in phones" :key="phone.type" :class="activeStyleIndex === index ? 'active' :''">
             <a @click="activeStyleIndex=index">{{ phone.type }} ({{ phone.width }} x {{ phone.height}})</a>
@@ -29,6 +29,8 @@ export default {
   data: function() {
     return {
       activeStyleIndex: 0,
+      processEnv: this.$config.baseURL,
+      active: '',
       phones: [
         {type: 'IPhone XS', width: '414px', height: '896px'},
         {type: 'IPhone 8 Plus', width: '414x', height: '736px'},
@@ -49,6 +51,17 @@ export default {
     canvas() {
       return { width: this.phones[this.activeStyleIndex].width, height: this.phones[this.activeStyleIndex].height};
     }
+  },
+  methods: {
+    async getActive() {
+      let res = await this.$store.dispatch('board/getActive');
+      console.log('called: ', res);
+      this.active = res.message;
+    }
+  },
+
+  mounted() {
+    this.getActive()
   }
 
 }

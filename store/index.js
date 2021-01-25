@@ -1,13 +1,30 @@
-import VuexOrm from '@vuex-orm/core';
-import database from '@/database'
-import data from "~/data";
-import Column from "~/models/Column";
 
-export const plugins = [
-  VuexOrm.install(database)
-]
+import Vuex from 'vuex'
+import VuexORM from '@vuex-orm/core';
+import VueORMAxios from '@vuex-orm/plugin-axios'
+// import database from '@/database'
 
-export const atate = () => {
+import { Database } from '@vuex-orm/core';
+import Element  from '@/models/Element';
+import Column  from '@/models/Column';
+import ColumnElement from "~/models/ColumnElement";
+import Board from '@/models/Board';
+import BoardColumn from '@/models/BoardColumn'
+
+
+VuexORM.use(VueORMAxios )
+const database = new VuexORM.Database();
+
+database.register(Element);
+database.register(Column);
+database.register(ColumnElement);
+database.register(Board);
+database.register(BoardColumn);
+
+
+export const plugins = [VuexORM.install(database)]
+
+export const state = () => {
   counter: 0
 }
 export const mutations = {

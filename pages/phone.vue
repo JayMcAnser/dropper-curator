@@ -1,6 +1,7 @@
 <template>
   <div>
-    <board-view></board-view>
+    <board-list></board-list>o
+
   </div>
 </template>
 
@@ -13,8 +14,8 @@ import Column  from "~/models/Column";
 export default {
   name: "phone",
   layout: 'phone',
-  async fetch() {
-    console.log('data:', data)
+
+  async fetch() {    
     const initialData = await data();
     Column.create({data: initialData});
 

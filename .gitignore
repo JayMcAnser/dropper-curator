@@ -88,6 +88,3 @@ sw.*
 
 # Vim swap files
 *.swp
-
-# data of the api
-api/data

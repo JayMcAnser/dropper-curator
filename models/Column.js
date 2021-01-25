@@ -7,7 +7,7 @@ import Element from './Element';
 import ColumnElement from "~/models/ColumnElement";
 
 export default class Column extends Model {
-  static entity = 'columns'
+  static entity = 'column'
 
   static fields() {
     return {

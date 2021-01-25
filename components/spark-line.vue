@@ -40,11 +40,12 @@ import Column from "~/models/Column";
 export default {
   name: "SparkLine",
   props: {
-    columns1: Array,
-    activeColumn1: Number
+    columns: Array,
+    // activeColumn1: Number
   },
   data: function() {
     return {
+//      columns: [],
       sparkCount: 19,
       sparks: [],
       sparkWidth: 3,
@@ -58,20 +59,26 @@ export default {
       buttonState: '',
     }
   },
+  // async fetch() {
+  //   let board = this.$store.getters['board/activeBoard']
+  //   if (board) {
+  //     this.columns = board.columns
+  //   }
+  // },
   computed: {
-    columns() {
-      //console.log('get columns')
-      return Column.query()
-          .with('elements')
-          .get();
-    },
+    // columns() {
+    //   //console.log('get columns')
+    //   return Column.query()
+    //       .with('elements')
+    //       .get();
+    // },
     activeColIndex: {
       get: function() {
         return this.$store.state.board.activeColumnIndex
       },
       set: function(index) {
         //console.log('set active', index)
-        this.$store.commit('board/activeIndex', index)
+        this.$store.commit('board/activeColumnIndex', index)
       }
     },
   },
@@ -119,6 +126,9 @@ export default {
         for (let index = 0; index < this.sparks.length; index++) {
           if (columnIndex >= 0 && columnIndex < this.columns.length) { // there is data for this column
             this.sparks[index].y = Math.floor(this.sparkTop * (this.elementCount(this.columns[columnIndex]) / maxVal) * .95)
+            if (!this.sparks[index].y) { // it can be NaN
+              this.sparks[index] = 0;
+            }
           }
           columnIndex++
         }
